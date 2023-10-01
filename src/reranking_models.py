@@ -134,7 +134,7 @@ class PopCon(object):
                 f'       Entropy@{ks_str}    |       Ginis@{ks_str}     |'  
         print(header)
         
-        content = f'{epoch:7d}'
+        content = '       '
         for item in recalls:
             content += f' {item:.4f} '
         content += '|'
