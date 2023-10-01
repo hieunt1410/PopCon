@@ -115,6 +115,13 @@ class PopCon(object):
         test_pos_idx = np.nonzero(self.user_bundle_test[user_idx].toarray())[1]
         pos_idx = torch.LongTensor(test_pos_idx).unsqueeze(1)
         batch_size = 1000
+        
+        ks_str = ','.join(f'{k:2d}' for k in ks)
+        header = f' Epoch |     Recall@{ks_str}    |' \
+                f'      MAP@{ks_str}     |     Coverage@{ks_str}       |'\
+                f'       Entropy@{ks_str}    |       Ginis@{ks_str}     |'  
+        print(header)
+            
         for batch_idx, start_idx in tqdm(enumerate(range(0, rec_list.shape[0], batch_size))):
             end_idx = min(start_idx + batch_size, rec_list.shape[0])
             result = rec_list[start_idx:end_idx]
@@ -124,14 +131,10 @@ class PopCon(object):
             map_list.append(maps)
             freq_list.append(freqs)
             
+            recalls = list(np.array(recall_list).sum(axis=0) / len(user_idx))
+            maps = list(np.array(map_list).sum(axis=0) / len(user_idx))
             freqs = torch.stack(freq_list).sum(dim=0)
             covs, ents, ginis = evaluate_diversities(freqs, div=div)
-        
-            ks_str = ','.join(f'{k:2d}' for k in ks)
-            header = f' Epoch |     Recall@{ks_str}    |' \
-                    f'      MAP@{ks_str}     |     Coverage@{ks_str}       |'\
-                    f'       Entropy@{ks_str}    |       Ginis@{ks_str}     |'  
-            print(header)
             
             content = '       '
             for item in recalls:
@@ -152,8 +155,6 @@ class PopCon(object):
         maps = list(np.array(map_list).sum(axis=0) / len(user_idx))
         # freqs = torch.stack(freq_list).sum(dim=0)
         # covs, ents, ginis = evaluate_diversities(freqs, div=div)
-        
-        
         
         return recalls, maps, covs, ents, ginis
 
