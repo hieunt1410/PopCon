@@ -123,11 +123,7 @@ class PopCon(object):
             recall_list.append(recalls)
             map_list.append(maps)
             freq_list.append(freqs)
-        recalls = list(np.array(recall_list).sum(axis=0) / len(user_idx))
-        maps = list(np.array(map_list).sum(axis=0) / len(user_idx))
-        freqs = torch.stack(freq_list).sum(dim=0)
-        covs, ents, ginis = evaluate_diversities(freqs, div=div)
-        
+            
         ks_str = ','.join(f'{k:2d}' for k in ks)
         header = f' Epoch |     Recall@{ks_str}    |' \
                 f'      MAP@{ks_str}     |     Coverage@{ks_str}       |'\
@@ -147,6 +143,14 @@ class PopCon(object):
         for item in ginis:
             content += f' {item:.4f} '
         print(content)
+        
+        
+        recalls = list(np.array(recall_list).sum(axis=0) / len(user_idx))
+        maps = list(np.array(map_list).sum(axis=0) / len(user_idx))
+        freqs = torch.stack(freq_list).sum(dim=0)
+        covs, ents, ginis = evaluate_diversities(freqs, div=div)
+        
+        
         
         return recalls, maps, covs, ents, ginis
 
