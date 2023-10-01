@@ -136,18 +136,24 @@ class PopCon(object):
             freqs = torch.stack(freq_list).sum(dim=0)
             covs, ents, ginis = evaluate_diversities(freqs, div=div)
             
-            content = '       '
+            content = '\n'
+            content += '    '
             for item in recalls:
                 content += f' {item:.4f} '
             content += '|'
             for item in maps:
                 content += f' {item:.4f} '
+            content += '|'
             for item in covs:
                 content += f' {item:.4f} '
+            content += '|'
             for item in ents:
                 content += f' {item:.4f} '
+            content += '|'
             for item in ginis:
                 content += f' {item:.4f} '
+            content += '|'
+            
             print(content)
         
         
