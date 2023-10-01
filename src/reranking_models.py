@@ -124,31 +124,34 @@ class PopCon(object):
             map_list.append(maps)
             freq_list.append(freqs)
             
-        ks_str = ','.join(f'{k:2d}' for k in ks)
-        header = f' Epoch |     Recall@{ks_str}    |' \
-                f'      MAP@{ks_str}     |     Coverage@{ks_str}       |'\
-                f'       Entropy@{ks_str}    |       Ginis@{ks_str}     |'  
-        print(header)
+            freqs = torch.stack(freq_list).sum(dim=0)
+            covs, ents, ginis = evaluate_diversities(freqs, div=div)
         
-        content = '       '
-        for item in recalls:
-            content += f' {item:.4f} '
-        content += '|'
-        for item in maps:
-            content += f' {item:.4f} '
-        for item in covs:
-            content += f' {item:.4f} '
-        for item in ents:
-            content += f' {item:.4f} '
-        for item in ginis:
-            content += f' {item:.4f} '
-        print(content)
+            ks_str = ','.join(f'{k:2d}' for k in ks)
+            header = f' Epoch |     Recall@{ks_str}    |' \
+                    f'      MAP@{ks_str}     |     Coverage@{ks_str}       |'\
+                    f'       Entropy@{ks_str}    |       Ginis@{ks_str}     |'  
+            print(header)
+            
+            content = '       '
+            for item in recalls:
+                content += f' {item:.4f} '
+            content += '|'
+            for item in maps:
+                content += f' {item:.4f} '
+            for item in covs:
+                content += f' {item:.4f} '
+            for item in ents:
+                content += f' {item:.4f} '
+            for item in ginis:
+                content += f' {item:.4f} '
+            print(content)
         
         
         recalls = list(np.array(recall_list).sum(axis=0) / len(user_idx))
         maps = list(np.array(map_list).sum(axis=0) / len(user_idx))
-        freqs = torch.stack(freq_list).sum(dim=0)
-        covs, ents, ginis = evaluate_diversities(freqs, div=div)
+        # freqs = torch.stack(freq_list).sum(dim=0)
+        # covs, ents, ginis = evaluate_diversities(freqs, div=div)
         
         
         
