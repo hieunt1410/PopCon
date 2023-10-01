@@ -89,11 +89,14 @@ def main(data, base, seed, epochs, alpha):
         model = model.to(TRN_DEVICE)
         trn_rec_loss, trn_div_loss = model.update_model()
         epoch_trn_elapsed = time.time() - trn_start_time
+        
         eval_start_time = time.time()
         model = model.to(EVA_DEVICE)
         vld_recalls, vld_maps = model.evaluate_val(ks, div=False)
         epoch_eval_elapsed = time.time() - eval_start_time
+        
         total_elapsed = time.time() - start_time
+        
         vld_content = form_content(epoch, [trn_rec_loss, 0],
                                vld_recalls, vld_maps,
                                [epoch_trn_elapsed, epoch_eval_elapsed, total_elapsed])
