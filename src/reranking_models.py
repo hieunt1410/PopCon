@@ -137,7 +137,7 @@ class PopCon(object):
             covs, ents, ginis = evaluate_diversities(freqs, div=div)
             
             content = '\n'
-            content += '    '
+            content += f'{batch_idx:7d}'
             for item in recalls:
                 content += f' {item:.4f} '
             content += '|'
@@ -157,8 +157,8 @@ class PopCon(object):
             print(content)
         
         
-        recalls = list(np.array(recall_list).sum(axis=0) / len(user_idx))
-        maps = list(np.array(map_list).sum(axis=0) / len(user_idx))
+        # recalls = list(np.array(recall_list).sum(axis=0) / len(user_idx))
+        # maps = list(np.array(map_list).sum(axis=0) / len(user_idx))
         # freqs = torch.stack(freq_list).sum(dim=0)
         # covs, ents, ginis = evaluate_diversities(freqs, div=div)
         
