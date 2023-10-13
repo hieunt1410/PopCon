@@ -48,7 +48,7 @@ def user_filtering(csr, neg):
 @click.option('--base', type=str, default='dam')
 @click.option('--model', type=str, default='popcon')
 @click.option('--beta', type=float, default=10000)
-@click.option('--n', type=int, default=100)
+@click.option('--n', type=int, default=200)
 @click.option('--seed', type=int, default=0)
 def main(data, base, model, beta, n, seed):
     """

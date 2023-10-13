@@ -197,12 +197,45 @@ class Origin(object):
         test_pos_idx = np.nonzero(self.user_bundle_test[user_idx].toarray())[1]
         pred_ranks = torch.topk(results, max(ks), dim=1, sorted=True)[1]
         recalls, maps, freqs = [], [], []
+        
+        ks_str = ','.join(f'{k:2d}' for k in ks)
+        header = f' Epoch |     Recall@{ks_str}    |' \
+                f'      MAP@{ks_str}     |     Coverage@{ks_str}       |'\
+                f'       Entropy@{ks_str}    |       Ginis@{ks_str}     |'  
+        print(header)
+        
         for k in ks:
             pred_rank = pred_ranks[:, :k]
             recall, map, freq = get_metrics(pred_rank, torch.LongTensor(test_pos_idx).unsqueeze(1), k, self.bundle_item, div=div)
             recalls.append(recall)
             maps.append(map)
             freqs.append(freq)
+            
+            recalls = list(np.array(recall_list).sum(axis=0) / len(user_idx))
+            maps = list(np.array(map_list).sum(axis=0) / len(user_idx))
+            freqs = torch.stack(freq_list).sum(dim=0)
+            covs, ents, ginis = evaluate_diversities(freqs, div=div)
+            
+            content = '\n'
+            content += f'{batch_idx:7d}|'
+            for item in recalls:
+                content += f' {item:.4f} '
+            content += '|'
+            for item in maps:
+                content += f' {item:.4f} '
+            content += '|'
+            for item in covs:
+                content += f' {item:.4f} '
+            content += '|'
+            for item in ents:
+                content += f' {item:.4f} '
+            content += '|'
+            for item in ginis:
+                content += f' {item:.4f} '
+            content += '|'
+            
+            print(content)
+            
         recalls = np.array(recalls) / user_idx.shape[0]
         maps = np.array(maps) / user_idx.shape[0]
         covs, ents, ginis = evaluate_diversities(torch.stack(freqs), div=div)

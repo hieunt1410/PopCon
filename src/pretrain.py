@@ -49,6 +49,7 @@ def user_filtering(csr, neg):
 @click.option('--seed', type=int, default=0)
 @click.option('--epochs', type=int, default=200)
 @click.option('--alpha', type=float, default=0.1)
+
 def main(data, base, seed, epochs, alpha):
     """
     Main function
