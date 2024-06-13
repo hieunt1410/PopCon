@@ -12,8 +12,8 @@ from torch.utils.tensorboard import SummaryWriter
 
 import torch
 import torch.optim as optim
-from src.util_crosscbr import Datasets
-from src.model_crosscbr import CrossCBR
+from util_crosscbr import Datasets
+from model_crosscbr import CrossCBR
 
 
 def get_cmd():
