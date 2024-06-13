@@ -3,7 +3,7 @@ import time
 import click
 
 from reranking_models import *
-from utils import *
+from util_dam import *
 
 
 def load_mat_dataset(dataname):
