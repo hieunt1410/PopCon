@@ -1,6 +1,6 @@
 from tqdm import tqdm
 
-from util_dam import *
+from util_crosscbr import *
 
 
 class PopCon(object):
@@ -15,9 +15,7 @@ class PopCon(object):
         self.beta = beta
         self.n = n
 
-    def get_dataset(self, n_user, n_item, n_bundle, bundle_item, user_item,
-                    user_bundle_trn, user_bundle_vld, vld_user_idx, user_bundle_test,
-                    user_bundle_test_mask):
+    def get_dataset(self, n_user, n_item, n_bundle, bundle_item, user_item, user_bundle_trn, user_bundle_vld, vld_user_idx, user_bundle_test, user_bundle_test_mask):
         """
         Get dataset
         """

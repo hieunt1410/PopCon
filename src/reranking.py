@@ -3,7 +3,7 @@ import time
 import click
 
 from reranking_models import *
-from util_dam import *
+from util_crosscbr import *
 
 
 def load_mat_dataset(dataname):
@@ -11,14 +11,24 @@ def load_mat_dataset(dataname):
     Load dataset
     """
     path = f'../data/{dataname}'
-    user_bundle_trn = load_obj(f'{path}/train.pkl')
-    user_bundle_vld = load_obj(f'{path}/valid.pkl')
-    user_bundle_test = load_obj(f'{path}/test.pkl')
-    user_item = load_obj(f'{path}/user_item.pkl')
-    bundle_item = load_obj(f'{path}/bundle_item.pkl')
-    user_bundle_neg = np.array(load_obj(f'{path}/neg.pkl'))
-    n_user, n_item = user_item.shape
-    n_bundle, _ = bundle_item.shape
+    conf = yaml.safe_load(open("./config.yaml"))
+    conf = conf[dataname]
+    dataset = Datasets(conf)
+    
+    n_user, n_bundle, n_item = dataset.num_users, dataset.num_bundles, dataset.num_items
+    user_bundle_trn = dataset.u_b_graph_train
+    user_bundle_vld = dataset.u_b_graph_val
+    user_bundle_test = dataset.u_b_graph_test
+    user_item = dataset.u_i_graph
+    bundle_item = dataset.b_i_graph
+    
+    user_bundle_neg = []
+    for u in range(n_user):
+        neg_bun = np.setdiff1d(np.arange(n_bundle), user_bundle_trn.col[user_bundle_trn.row == u])
+        np.random.shuffle(neg_bun)
+        neg.append(neg_bun[:100])
+        
+    user_bundle_neg = np.array(user_bundle_neg)
 
     user_bundle_test_mask = user_bundle_trn + user_bundle_vld
 
@@ -44,8 +54,8 @@ def user_filtering(csr, neg):
 
 
 @click.command()
-@click.option('--data', type=str, default='steam')
-@click.option('--base', type=str, default='dam')
+@click.option('--data', type=str, default='Youshu')
+@click.option('--base', type=str, default='CrossCBR')
 @click.option('--model', type=str, default='popcon')
 @click.option('--beta', type=float, default=10000)
 @click.option('--n', type=int, default=200)
@@ -58,8 +68,8 @@ def main(data, base, model, beta, n, seed):
     n_user, n_item, n_bundle, bundle_item, user_item,\
     user_bundle_trn, user_bundle_vld, vld_user_idx, user_bundle_test,\
     user_bundle_test_mask = load_mat_dataset(data)
-    ks = [1, 3, 5]
-    result_path = f'../out/{data}/{base}_results.pt'
+    ks = [30, 50]
+    result_path = f'./checkpoints/{data}/{base}/model/results.pt'
     results = torch.load(result_path).to('cpu')
 
     print('=========================== LOADED ===========================')

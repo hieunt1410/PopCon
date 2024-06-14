@@ -100,8 +100,8 @@ def main():
         setting = "_".join(settings)
         log_path = log_path + "/" + setting
         run_path = run_path + "/" + setting
-        checkpoint_model_path = checkpoint_model_path + "/" + setting
-        checkpoint_conf_path = checkpoint_conf_path + "/" + setting
+        checkpoint_model_path = checkpoint_model_path + "/" + 'log.txt'
+        checkpoint_conf_path = checkpoint_conf_path + "/" + 'results.pt'
             
         run = SummaryWriter(run_path)
 
