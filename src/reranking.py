@@ -5,6 +5,8 @@ import click
 from reranking_models import *
 from util_crosscbr import *
 
+import yaml
+
 CUDA = torch.cuda.is_available()
 TRN_DEVICE = torch.device('cuda' if CUDA else 'cpu')
 EVA_DEVICE = torch.device('cuda')
