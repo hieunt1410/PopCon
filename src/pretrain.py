@@ -110,7 +110,6 @@ def main():
         checkpoint_conf_path = checkpoint_conf_path + "/" + 'log.txt'
             
         run = SummaryWriter(run_path)
-        glob_settings.CONF_GLOB = conf
         
         # model
         if conf['model'] == 'CrossCBR':

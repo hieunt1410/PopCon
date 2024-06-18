@@ -1,1 +1,0 @@
-CONF_GLOB = None

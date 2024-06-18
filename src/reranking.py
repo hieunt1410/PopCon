@@ -32,10 +32,10 @@ def load_mat_dataset(dataname):
     Load dataset
     """
     path = f'../data_pkl/{dataname}'
-    # conf = yaml.safe_load(open("./config.yaml"))
+    conf = yaml.safe_load(open("./config.yaml"))
     conf = glob_settings.CONF_GLOB
-    # conf = conf[dataname]
-    # conf['dataset'] = dataname
+    conf = conf[dataname]
+    conf['dataset'] = dataname
     # conf['device'] = TRN_DEVICE
     
     dataset = Datasets(conf)
