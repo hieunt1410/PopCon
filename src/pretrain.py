@@ -15,7 +15,6 @@ import torch.optim as optim
 from util_crosscbr import Datasets
 from model_crosscbr import CrossCBR
 from preprocess import resplit
-import glob_settings 
 
 def get_cmd():
     parser = argparse.ArgumentParser()
