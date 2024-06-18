@@ -4,6 +4,7 @@ import pandas as pd
 import scipy.sparse as sp
 import pickle
 from collections import Counter
+import shutil
 
 def get_ub(dataname, task):
     with open(os.path.join('../data/{}'.format(dataname
@@ -37,8 +38,8 @@ def resplit(dataname):
             f2.write(f'{u}\t{bundles[-2]}\n')
             f3.write(f'{u}\t{bundles[-1]}\n')       
     
-    os.copy(f'../data/{dataname}/user_item.txt', f'../data_pkl/{dataname}/user_item.txt')
-    os.copy(f'../data/{dataname}/bundle_item.txt', f'../data_pkl/{dataname}/bundle_item.txt')
+    shutil.copy(f'../data/{dataname}/user_item.txt', f'../data_pkl/{dataname}/user_item.txt')
+    shutil.copy(f'../data/{dataname}/bundle_item.txt', f'../data_pkl/{dataname}/bundle_item.txt')
     
     
 def regen(dataname):
