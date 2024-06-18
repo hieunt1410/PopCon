@@ -23,6 +23,10 @@ def resplit(dataname):
     test = pd.read_csv(f'../data/{dataname}/user_bundle_test.txt', sep='\t', names=['user', 'bundle'])
     total = pd.concat([train, tune, test])
     
+    path = '../data_pkl/{}'.format(dataname)
+    if not os.path.exists(path):
+        os.makedirs(path)
+    
     with open(f'../data_pkl/{dataname}/user_bundle_train.txt', 'w') as f1, \
     open(f'../data_pkl/{dataname}/user_bundle_tune.txt', 'w') as f2, \
     open(f'../data_pkl/{dataname}/user_bundle_test.txt', 'w') as f3:
