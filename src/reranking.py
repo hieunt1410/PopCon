@@ -43,6 +43,9 @@ def load_mat_dataset(dataname):
     _, user_item = dataset.get_ui()
     bundle_item = dataset.get_bi()
     
+    user_bundle_neg = dataset.user_bundle_neg
+    
+    
     user_bundle_test_mask = user_bundle_trn + user_bundle_vld
 
     # filtering
