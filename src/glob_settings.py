@@ -1,1 +1,1 @@
-config_global = None
+CONF_GLOB = None
