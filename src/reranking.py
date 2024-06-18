@@ -5,6 +5,23 @@ import click
 from reranking_models import *
 from util_crosscbr import *
 
+CUDA = torch.cuda.is_available()
+TRN_DEVICE = torch.device('cuda' if CUDA else 'cpu')
+EVA_DEVICE = torch.device('cuda')
+
+def set_seed(seed):
+    """
+    Set random seed
+    """
+    torch.manual_seed(seed)
+    np.random.seed(seed)
+    random.seed(seed)
+    if CUDA:
+        torch.cuda.manual_seed(seed)
+        torch.cuda.manual_seed(seed)
+        torch.cuda.manual_seed_all(seed)  # if use multi-GPU
+        torch.backends.cudnn.deterministic = True
+        torch.backends.cudnn.benchmark = False
 
 def load_mat_dataset(dataname):
     """
