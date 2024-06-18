@@ -8,7 +8,7 @@ import scipy.sparse as sp
 
 import torch
 from torch.utils.data import Dataset, DataLoader
-
+import pickle
 
 def print_statistics(X, string):
     print('>'*10 + string + '>'*10 )
