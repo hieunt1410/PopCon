@@ -5,7 +5,8 @@ import scipy.sparse as sp
 import pickle
 
 def get_ub(dataname, task):
-    with open(os.path.join('../data/{}'.format(dataname), 'user_bundle_{}.txt'.format(task)), 'r') as f:
+    with open(os.path.join('../data/{}'.format(dataname
+                                               ), 'user_bundle_{}.txt'.format(task)), 'r') as f:
         u_b_pairs = list(map(lambda s: tuple(int(i) for i in s[:-1].split('\t')), f.readlines()))
 
     indice = np.array(u_b_pairs, dtype=np.int32)
