@@ -18,9 +18,9 @@ def get_ub(dataname, task):
     return u_b_pairs, u_b_graph
 
 def resplit(dataname):
-    train = pd.read_csv(f'../data/{dataname}/user_bundle_train.csv', sep='\t', names=['user', 'bundle'])
-    tune = pd.read_csv(f'../data/{dataname}/user_bundle_tune.csv', sep='\t', names=['user', 'bundle'])
-    test = pd.read_csv(f'../data/{dataname}/user_bundle_test.csv', sep='\t', names=['user', 'bundle'])
+    train = pd.read_csv(f'../data/{dataname}/user_bundle_train.txt', sep='\t', names=['user', 'bundle'])
+    tune = pd.read_csv(f'../data/{dataname}/user_bundle_tune.txt', sep='\t', names=['user', 'bundle'])
+    test = pd.read_csv(f'../data/{dataname}/user_bundle_test.txt', sep='\t', names=['user', 'bundle'])
     total = pd.concat([train, tune, test])
     
     with open(f'../data_pkl/{dataname}/user_bundle_train.txt', 'w') as f1, \
