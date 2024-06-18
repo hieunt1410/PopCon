@@ -34,7 +34,7 @@ def load_mat_dataset(dataname):
     conf = yaml.safe_load(open("./config.yaml"))
     conf = conf[dataname]
     conf['dataset'] = dataname
-    # conf['device'] = TRN_DEVICE
+    conf['device'] = TRN_DEVICE
     
     dataset = Datasets(conf)
     
