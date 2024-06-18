@@ -32,16 +32,17 @@ def load_mat_dataset(dataname):
     path = f'../data_pkl/{dataname}'
     conf = yaml.safe_load(open("./config.yaml"))
     conf = conf[dataname]
+    conf['dataset'] = dataname
+
     dataset = Datasets(conf)
     
     n_user, n_bundle, n_item = dataset.num_users, dataset.num_bundles, dataset.num_items
-    user_bundle_trn = dataset.u_b_graph_train
-    user_bundle_vld = dataset.u_b_graph_val
-    user_bundle_test = dataset.u_b_graph_test
-    user_item = dataset.u_i_graph
-    bundle_item = dataset.b_i_graph
+    _, user_bundle_trn = dataset.get_ub('train')
+    _, user_bundle_vld = dataset.get_ub('tune')
+    _, user_bundle_test = dataset.get_ub('test')
+    _, user_item = dataset.get_ui()
+    bundle_item = dataset.get_bi()
     
-
     user_bundle_test_mask = user_bundle_trn + user_bundle_vld
 
     # filtering
