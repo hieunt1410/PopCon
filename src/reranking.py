@@ -22,13 +22,6 @@ def load_mat_dataset(dataname):
     user_item = dataset.u_i_graph
     bundle_item = dataset.b_i_graph
     
-    user_bundle_neg = []
-    for u in range(n_user):
-        neg_bun = np.setdiff1d(np.arange(n_bundle), user_bundle_trn.col[user_bundle_trn.row == u])
-        np.random.shuffle(neg_bun)
-        neg.append(neg_bun[:100])
-        
-    user_bundle_neg = np.array(user_bundle_neg)
 
     user_bundle_test_mask = user_bundle_trn + user_bundle_vld
 

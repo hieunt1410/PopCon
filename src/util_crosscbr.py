@@ -99,6 +99,8 @@ class Datasets():
         self.bundle_test_data = BundleTestDataset(u_b_pairs_test, u_b_graph_test, u_b_graph_train, self.num_users, self.num_bundles)
 
         self.graphs = [u_b_graph_train, u_i_graph, b_i_graph]
+        
+        self.user_bundle_neg = np.array([np.random.choice(np.setdiff1d(np.arange(self.num_bundles), u_b_graph_train[u].nonzero()[1]), 99, replace=False) for u in range(self.num_users)])
 
         self.train_loader = DataLoader(self.bundle_train_data, batch_size=batch_size_train, shuffle=True, num_workers=10, drop_last=True)
         self.val_loader = DataLoader(self.bundle_val_data, batch_size=batch_size_test, shuffle=False, num_workers=20)
@@ -156,7 +158,7 @@ class Datasets():
 
 
     def get_ub(self, task):
-        with open(os.path.join(self.path, self.name, 'user_bundle_{}.txt'.format(task)), 'r') as f:
+        with open(os.path.join(self.path + '_pkl', self.name, 'user_bundle_{}.txt'.format(task)), 'r') as f:
             u_b_pairs = list(map(lambda s: tuple(int(i) for i in s[:-1].split('\t')), f.readlines()))
             # u_b_graph = pickle.load(f)
         
