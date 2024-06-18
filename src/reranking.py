@@ -37,6 +37,7 @@ def load_mat_dataset(dataname):
     conf['dataset'] = dataname
     conf['device'] = TRN_DEVICE
     conf['model'] = 'CrossCBR'
+    conf['info'] = ''
     
     dataset = Datasets(conf)
     
@@ -88,6 +89,9 @@ def load_mat_dataset(dataname):
     
     user_bundle_neg = dataset.user_bundle_neg
     
+    conf["num_users"] = n_user
+    conf["num_bundles"] = n_bundle
+    conf["num_items"] = n_item
     
     user_bundle_test_mask = user_bundle_trn + user_bundle_vld
 
