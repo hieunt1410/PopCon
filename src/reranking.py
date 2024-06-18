@@ -29,7 +29,7 @@ def load_mat_dataset(dataname):
     """
     Load dataset
     """
-    path = f'../data/{dataname}'
+    path = f'../data_pkl/{dataname}'
     conf = yaml.safe_load(open("./config.yaml"))
     conf = conf[dataname]
     dataset = Datasets(conf)
