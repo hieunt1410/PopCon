@@ -15,6 +15,7 @@ import torch.optim as optim
 from util_crosscbr import Datasets
 from model_crosscbr import CrossCBR
 from preprocess import resplit
+import glob_settings 
 
 def get_cmd():
     parser = argparse.ArgumentParser()
@@ -109,7 +110,8 @@ def main():
         checkpoint_conf_path = checkpoint_conf_path + "/" + 'log.txt'
             
         run = SummaryWriter(run_path)
-
+        glob_settings.config_global = conf
+        
         # model
         if conf['model'] == 'CrossCBR':
             model = CrossCBR(conf, dataset.graphs).to(device)

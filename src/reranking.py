@@ -7,6 +7,7 @@ from util_crosscbr import *
 from model_crosscbr import *
 
 import yaml
+import glob_settings
 
 CUDA = torch.cuda.is_available()
 TRN_DEVICE = torch.device('cuda' if CUDA else 'cpu')
@@ -31,10 +32,11 @@ def load_mat_dataset(dataname):
     Load dataset
     """
     path = f'../data_pkl/{dataname}'
-    conf = yaml.safe_load(open("./config.yaml"))
-    conf = conf[dataname]
-    conf['dataset'] = dataname
-    conf['device'] = TRN_DEVICE
+    # conf = yaml.safe_load(open("./config.yaml"))
+    conf = glob_settings.config_global
+    # conf = conf[dataname]
+    # conf['dataset'] = dataname
+    # conf['device'] = TRN_DEVICE
     
     dataset = Datasets(conf)
     
