@@ -36,6 +36,7 @@ def load_mat_dataset(dataname):
     conf = conf[dataname]
     conf['dataset'] = dataname
     conf['device'] = TRN_DEVICE
+    conf['model'] = 'CrossCBR'
     
     dataset = Datasets(conf)
     
