@@ -7,6 +7,7 @@ from util_crosscbr import *
 from model_crosscbr import *
 
 import yaml
+from itertools import product
 
 CUDA = torch.cuda.is_available()
 TRN_DEVICE = torch.device('cuda' if CUDA else 'cpu')
