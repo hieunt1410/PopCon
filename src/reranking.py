@@ -132,10 +132,10 @@ def main(data, base, model, beta, n, seed):
     set_seed(seed)
     n_user, n_item, n_bundle, bundle_item, user_item,\
     user_bundle_trn, user_bundle_vld, vld_user_idx, user_bundle_test,\
-    user_bundle_test_mask, model = load_mat_dataset(data)
+    user_bundle_test_mask, model_ = load_mat_dataset(data)
     ks = [30, 50]
     result_path = f'./checkpoints/{data}/{base}/model/results.pt'
-    results = model.load_state_dict(torch.load(result_path).to('cpu'))
+    results = model_.load_state_dict(torch.load(result_path).to('cpu'))
     
     print('=========================== LOADED ===========================')
 
