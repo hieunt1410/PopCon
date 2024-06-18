@@ -174,3 +174,47 @@ class Datasets():
         print_statistics(u_b_graph, "U-B statistics in %s" %(task))
 
         return u_b_pairs, u_b_graph
+    
+def set_seed(seed):
+    """
+    Set random seed
+    """
+    torch.manual_seed(seed)
+    np.random.seed(seed)
+    random.seed(seed)
+    if CUDA:
+        torch.cuda.manual_seed(seed)
+        torch.cuda.manual_seed(seed)
+        torch.cuda.manual_seed_all(seed)  # if use multi-GPU
+        torch.backends.cudnn.deterministic = True
+        torch.backends.cudnn.benchmark = False
+
+
+def spy_sparse2torch_sparse(data):
+    """
+    Transform scipy sparse tensor to torch sparse tensor
+    """
+    samples = data.shape[0]
+    features = data.shape[1]
+    values = data.data
+    coo_data = data.tocoo()
+    indices = torch.LongTensor(np.array([coo_data.row, coo_data.col]))
+    t = torch.sparse.FloatTensor(indices, torch.from_numpy(values).float(), [samples, features])
+    return t
+
+
+def sparse_dense_mul(s, d):
+    """
+    Matrix multiplication between sparse matrix and dense matrix
+    """
+    i = s._indices()
+    v = s._values()
+    dv = d[i[0,:], i[1,:]]  # get values from relevant entries of dense matrix
+    return torch.sparse.FloatTensor(i, v * dv, s.size())
+
+
+def naive_sparse2tensor(data):
+    """
+    Transform torch sparse tensor to torch dense tensor
+    """
+    return torch.FloatTensor(data.toarray())
