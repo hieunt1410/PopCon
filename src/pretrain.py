@@ -14,7 +14,7 @@ import torch
 import torch.optim as optim
 from util_crosscbr import Datasets
 from model_crosscbr import CrossCBR
-
+from preprocess import regen
 
 def get_cmd():
     parser = argparse.ArgumentParser()
@@ -43,6 +43,11 @@ def main():
         conf = conf[dataset_name]
     conf["dataset"] = dataset_name
     conf["model"] = paras["model"]
+    
+    # if os.path.exists(f'../data_pkl/{dataset_name}'):
+    #     os.mkdir(f'../data_pkl/{dataset_name}')
+    regen(dataset_name)
+    
     dataset = Datasets(conf)
 
     conf["gpu"] = paras["gpu"]

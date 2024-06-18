@@ -156,13 +156,18 @@ class Datasets():
 
 
     def get_ub(self, task):
-        with open(os.path.join(self.path, self.name, 'user_bundle_{}.txt'.format(task)), 'r') as f:
-            u_b_pairs = list(map(lambda s: tuple(int(i) for i in s[:-1].split('\t')), f.readlines()))
-
-        indice = np.array(u_b_pairs, dtype=np.int32)
-        values = np.ones(len(u_b_pairs), dtype=np.float32)
-        u_b_graph = sp.coo_matrix(
-            (values, (indice[:, 0], indice[:, 1])), shape=(self.num_users, self.num_bundles)).tocsr()
+        with open(os.path.join(self.path + '_pkl', self.name, 'user_bundle_{}.pkl'.format(task)), 'rb') as f:
+            # u_b_pairs = list(map(lambda s: tuple(int(i) for i in s[:-1].split('\t')), f.readlines()))
+            u_b_graph = pickle.load(f)
+        
+        row, col = u_b_graph.nonzero()
+        row = np.array(row)
+        col = np.array(col)
+        u_b_pairs = np.concatenate((row[:, np.newaxis], col[:, np.newaxis]), axis=1)
+        # indice = np.array(u_b_pairs, dtype=np.int32)
+        # values = np.ones(len(u_b_pairs), dtype=np.float32)
+        # u_b_graph = sp.coo_matrix(
+        #     (values, (indice[:, 0], indice[:, 1])), shape=(self.num_users, self.num_bundles)).tocsr()
 
         print_statistics(u_b_graph, "U-B statistics in %s" %(task))
 
