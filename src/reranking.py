@@ -4,6 +4,7 @@ import click
 
 from reranking_models import *
 from util_crosscbr import *
+from model_crosscbr import *
 
 import yaml
 
@@ -52,9 +53,11 @@ def load_mat_dataset(dataname):
     user_bundle_vld, vld_user_idx = user_filtering(user_bundle_vld,
                                                    user_bundle_neg)
 
+    model = CrossCBR(conf, dataset.graphs).to(TRN_DEVICE)
+    
     return n_user, n_item, n_bundle, bundle_item, user_item,\
            user_bundle_trn, user_bundle_vld, vld_user_idx, user_bundle_test,\
-           user_bundle_test_mask
+           user_bundle_test_mask, model
 
 
 def user_filtering(csr, neg):
@@ -83,11 +86,11 @@ def main(data, base, model, beta, n, seed):
     set_seed(seed)
     n_user, n_item, n_bundle, bundle_item, user_item,\
     user_bundle_trn, user_bundle_vld, vld_user_idx, user_bundle_test,\
-    user_bundle_test_mask = load_mat_dataset(data)
+    user_bundle_test_mask, model = load_mat_dataset(data)
     ks = [30, 50]
     result_path = f'./checkpoints/{data}/{base}/model/results.pt'
-    results = torch.load(result_path).to('cpu')
-
+    results = model.load_state_dict(torch.load(result_path).to('cpu'))
+    
     print('=========================== LOADED ===========================')
 
     if model == 'origin':
