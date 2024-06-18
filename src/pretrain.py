@@ -106,7 +106,7 @@ def main():
         log_path = log_path + "/" + setting
         run_path = run_path + "/" + setting
         checkpoint_model_path = checkpoint_model_path + "/" + 'results.pt'
-        checkpoint_conf_path = checkpoint_conf_path + "/" + 'logs.txt'
+        checkpoint_conf_path = checkpoint_conf_path + "/" + 'log.txt'
             
         run = SummaryWriter(run_path)
 
