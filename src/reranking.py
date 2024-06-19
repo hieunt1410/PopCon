@@ -41,45 +41,6 @@ def load_mat_dataset(dataname):
     
     dataset = Datasets(conf)
     
-    for lr, l2_reg, item_level_ratio, bundle_level_ratio, bundle_agg_ratio, embedding_size, num_layers, c_lambda, c_temp in \
-            product(conf['lrs'], conf['l2_regs'], conf['item_level_ratios'], conf['bundle_level_ratios'], conf['bundle_agg_ratios'], conf["embedding_sizes"], conf["num_layerss"], conf["c_lambdas"], conf["c_temps"]):
-        log_path = "./log/%s/%s" %(conf["dataset"], conf["model"])
-        run_path = "./runs/%s/%s" %(conf["dataset"], conf["model"])
-        checkpoint_model_path = "./checkpoints/%s/%s/model" %(conf["dataset"], conf["model"])
-        checkpoint_conf_path = "./checkpoints/%s/%s/conf" %(conf["dataset"], conf["model"])
-        if not os.path.isdir(run_path):
-            os.makedirs(run_path)
-        if not os.path.isdir(log_path):
-            os.makedirs(log_path)
-        if not os.path.isdir(checkpoint_model_path):
-            os.makedirs(checkpoint_model_path)
-        if not os.path.isdir(checkpoint_conf_path):
-            os.makedirs(checkpoint_conf_path)
-
-        conf["l2_reg"] = l2_reg
-        conf["embedding_size"] = embedding_size
-
-        settings = []
-        if conf["info"] != "":
-            settings += [conf["info"]]
-
-        settings += [conf["aug_type"]]
-        if conf["aug_type"] == "ED":
-            settings += [str(conf["ed_interval"])]
-        if conf["aug_type"] == "OP":
-            assert item_level_ratio == 0 and bundle_level_ratio == 0 and bundle_agg_ratio == 0
-
-        settings += ["Neg_%d" %(conf["neg_num"]), str(conf["batch_size_train"]), str(lr), str(l2_reg), str(embedding_size)]
-
-        conf["item_level_ratio"] = item_level_ratio
-        conf["bundle_level_ratio"] = bundle_level_ratio
-        conf["bundle_agg_ratio"] = bundle_agg_ratio
-        conf["num_layers"] = num_layers
-        settings += [str(item_level_ratio), str(bundle_level_ratio), str(bundle_agg_ratio), str(num_layers)]
-
-        conf["c_lambda"] = c_lambda
-        conf["c_temp"] = c_temp
-    
     n_user, n_bundle, n_item = dataset.num_users, dataset.num_bundles, dataset.num_items
     _, user_bundle_trn = dataset.get_ub('train')
     _, user_bundle_vld = dataset.get_ub('tune')
@@ -99,11 +60,10 @@ def load_mat_dataset(dataname):
     user_bundle_vld, vld_user_idx = user_filtering(user_bundle_vld,
                                                    user_bundle_neg)
 
-    model = CrossCBR(conf, dataset.graphs).to(TRN_DEVICE)
     
     return n_user, n_item, n_bundle, bundle_item, user_item,\
            user_bundle_trn, user_bundle_vld, vld_user_idx, user_bundle_test,\
-           user_bundle_test_mask, model
+           user_bundle_test_mask
 
 
 def user_filtering(csr, neg):
@@ -132,10 +92,10 @@ def main(data, base, model, beta, n, seed):
     set_seed(seed)
     n_user, n_item, n_bundle, bundle_item, user_item,\
     user_bundle_trn, user_bundle_vld, vld_user_idx, user_bundle_test,\
-    user_bundle_test_mask, model_ = load_mat_dataset(data)
+    user_bundle_test_mask = load_mat_dataset(data)
     ks = [30, 50]
     result_path = f'./checkpoints/{data}/{base}/model/results.pt'
-    results = model_.load_state_dict(torch.load(result_path)).to('cpu')
+    results = torch.load(result_path).to('cpu')
     
     print('=========================== LOADED ===========================')
 
