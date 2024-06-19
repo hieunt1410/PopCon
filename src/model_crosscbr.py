@@ -61,8 +61,8 @@ class CrossCBR(nn.Module):
         self.init_emb()
 
         assert isinstance(raw_graph, list)
-        self.ub_graph, self.ui_graph, self.bi_graph = raw_graph
-
+        self.ub_graph, self.ub_graph_val, self.ub_graph_test, self.ui_graph, self.bi_graph = raw_graph
+        
         # generate the graph without any dropouts for testing
         self.get_item_level_graph_ori()
         self.get_bundle_level_graph_ori()
@@ -292,14 +292,14 @@ class CrossCBR(nn.Module):
         self.eval()
         with torch.no_grad():
             # recall_list, map_list, freq_list = [], [], []
-            user_idx, _ = np.nonzero(np.sum(self.user_bundle_test, 1))
-            test_pos_idx = np.nonzero(self.user_bundle_test[user_idx].toarray())[1]
-            ub_masks = self.user_bundle_test_mask[user_idx]
+            user_idx, _ = np.nonzero(np.sum(self.ub_graph_test, 1))
+            test_pos_idx = np.nonzero(self.ub_graph_test[user_idx].toarray())[1]
+            ub_masks = self.ub_graph_test[user_idx]
             for batch_idx, start_idx in enumerate(range(0, len(user_idx), batch_size)):
                 end_idx = min(start_idx + batch_size, len(user_idx))
                 u_idx = user_idx[start_idx:end_idx]
-                u_idx = np.tile(u_idx, (self.n_bundle, 1)).transpose()
-                b_idx = np.tile(np.arange(self.n_bundle), (u_idx.shape[0], 1))
+                u_idx = np.tile(u_idx, (self.num_bundles, 1)).transpose()
+                b_idx = np.tile(np.arange(self.num_bundles), (u_idx.shape[0], 1))
                 u_idx = u_idx.flatten()
                 b_idx = b_idx.flatten()
                 u_idx = torch.LongTensor(u_idx).to(self.device)
@@ -307,8 +307,9 @@ class CrossCBR(nn.Module):
                 u_batch = self.get_user_embs(u_idx)
                 b_batch = self.get_bundle_embs(u_idx, b_idx, self.device)
                 ub = torch.cat((u_batch, b_batch), 1)
-                ub = self.forward(ub, bundle=True)
-                ub = torch.reshape(ub, (-1, self.n_bundle))
+                # ub = self.forward(ub, bundle=True)
+                ub = self.evaluate((u_batch, b_batch), u_idx)
+                ub = torch.reshape(ub, (-1, self.num_bundles))
                 ub_filtered = ub.masked_fill(naive_sparse2tensor(ub_masks[start_idx:end_idx]).bool().to(self.device), -float('inf'))
                 # pos_idx = torch.LongTensor(test_pos_idx[start_idx:end_idx]).to(self.device)
                 # recalls, maps, freqs = evaluate_metrics(ub_filtered, pos_idx.unsqueeze(1), self.bundle_item, ks=ks, div=div)

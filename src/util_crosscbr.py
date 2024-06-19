@@ -98,7 +98,7 @@ class Datasets():
         self.bundle_val_data = BundleTestDataset(u_b_pairs_val, u_b_graph_val, u_b_graph_train, self.num_users, self.num_bundles)
         self.bundle_test_data = BundleTestDataset(u_b_pairs_test, u_b_graph_test, u_b_graph_train, self.num_users, self.num_bundles)
 
-        self.graphs = [u_b_graph_train, u_i_graph, b_i_graph]
+        self.graphs = [u_b_graph_train, u_b_graph_val, u_b_graph_test, u_i_graph, b_i_graph]
         
         self.user_bundle_neg = np.array([np.random.choice(np.setdiff1d(np.arange(self.num_bundles), u_b_graph_train[u].nonzero()[1]), 99, replace=False) for u in range(self.num_users)])
 
