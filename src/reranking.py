@@ -112,21 +112,24 @@ def main(data, base, model, beta, n, seed):
                           user_bundle_test, user_bundle_test_mask)
 
     test_start_time = time.time()
-    test_recalls, test_maps, test_covs, test_ents, test_ginis = model.evaluate_test(results, ks, div=True)
+    test_recalls, test_ndcgs, test_maps, test_covs, test_ents, test_ginis = model.evaluate_test(results, ks, div=True)
     test_elapsed = time.time() - test_start_time
 
     test_content = form_content(0, [0, 0],
-                                test_recalls, test_maps, test_covs, test_ents, test_ginis,
+                                test_recalls, test_ndcgs, test_maps, test_covs, test_ents, test_ginis,
                                 [0, test_elapsed, test_elapsed])
     print(test_content)
 
 
-def form_content(epoch, losses, recalls, maps, covs, ents, ginis, elapses):
+def form_content(epoch, losses, recalls, ndcgs, maps, covs, ents, ginis, elapses):
     """
     Format of logs
     """
     content = f'{epoch:7d}| {losses[0]:10.4f} {losses[1]:10.4f} |'
     for item in recalls:
+        content += f' {item:.4f} '
+    content += '|'
+    for item in ndcgs:
         content += f' {item:.4f} '
     content += '|'
     for item in maps:

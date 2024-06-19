@@ -103,19 +103,93 @@ class PopCon(object):
         rec_list = torch.cat(rec_list, dim=1)
         return rec_list
 
+    def evaluate_metrics(self, pred, pos_idx, bundle_item, ks: list, div: bool, score=True):
+        """
+        Evaluate performance in terms of recalls, maps, and frequencies
+        """
+        recalls, ndcgs, maps, freqs = [], [], [], []
+        if score:
+            pred_rank = torch.topk(pred, max(ks), dim=1, sorted=True)[1]
+        else:
+            pred_rank = pred
+        for k in ks:
+            recall, ndcg, map, freq = self.get_metrics(pred_rank, pos_idx, k, bundle_item, div)
+            recalls.append(recall)
+            ndcgs.append(ndcg)
+            maps.append(map)
+            freqs.append(freq)
+        return recalls, ndcgs, maps, torch.stack(freqs)
+
+
+    def get_metrics(self, pred_rank, pos_idx, k, bundle_item, div: bool):
+        """
+        Get evaluation metrics
+        """
+        pos = torch.eq(pred_rank, pos_idx).float()
+        # recall and map
+        recall = pos[:, :k].sum().item()
+        
+        dcg = (pos[:, :k] / torch.log2(torch.arange(2, k + 2).float())).sum().item()
+        idcg = (torch.sort(pos, descending=True)[0][:, :k] / torch.log2(torch.arange(2, k + 2).float())).sum().item()
+        ndcg = dcg / idcg if idcg > 0 else 0
+        
+        idxs = torch.nonzero(pos[:, :k], as_tuple=True)[1]
+        map = (1 / (idxs + 1).float()).sum().item()
+        # frequency
+        if div:
+            freq = torch.tensor(
+                bundle_item[pred_rank[:, :k].flatten().cpu()].sum(axis=0)).squeeze()
+        else:
+            freq = torch.zeros(bundle_item.shape[1])
+        return recall, ndcg, map, freq
+        
+    def evaluate_diversities(self, freqs, div: bool):
+        """
+        Evaluate diversities
+        """
+        covs, ents, ginis = [], [], []
+        if div:
+            for freq in freqs:
+                cov = torch.count_nonzero(freq).item()
+                covs.append(cov/freqs.shape[1])
+                prob = freq/freq.sum()
+                prob = prob.clamp(min=1e-9)
+                ent = -prob*torch.log2(prob)
+                ent = torch.sum(ent)
+                ents.append(ent)
+                gini = self.evaluate_gini(freq.float()).item()
+                ginis.append(gini)
+            return covs, ents, ginis
+        else:
+            covs = [0., 0., 0.]
+            ents = [0., 0., 0.]
+            ginis = [0., 0., 0.]
+            return covs, ents, ginis
+
+
+    def evaluate_gini(self, freq, eps=1e-7):
+        """
+        Evaluate Gini-coefficient
+        """
+        freq += eps
+        freq = freq.sort()[0]
+        n = freq.shape[0]
+        idx = torch.arange(1, n + 1)
+        return (torch.sum((2 * idx - n - 1) * freq)) / (n * freq.sum())
+
     def evaluate_test(self, results, ks, div=True):
         """
         Evaluate the results
         """
         rec_list = self.rerank(results, ks)
-        recall_list, map_list, freq_list = [], [], []
+        recall_list, ndcg_list, map_list, freq_list = [], [], [], []
         user_idx, _ = np.nonzero(np.sum(self.user_bundle_test, 1))
         test_pos_idx = np.nonzero(self.user_bundle_test[user_idx].toarray())[1]
         pos_idx = torch.LongTensor(test_pos_idx).unsqueeze(1)
-        batch_size = 1000
+        batch_size = 2048
         
         ks_str = ','.join(f'{k:2d}' for k in ks)
-        header = f' Epoch |     Recall@{ks_str}    |' \
+        header = f' Epoch |     Recall@{ks_str}    |     NDCG@{ks_str}    ' \
                 f'      MAP@{ks_str}     |     Coverage@{ks_str}       |'\
                 f'       Entropy@{ks_str}    |       Ginis@{ks_str}     |'  
         print(header)
@@ -124,19 +198,24 @@ class PopCon(object):
             end_idx = min(start_idx + batch_size, rec_list.shape[0])
             result = rec_list[start_idx:end_idx]
             pos = pos_idx[start_idx:end_idx]
-            recalls, maps, freqs = evaluate_metrics(result, pos, self.bundle_item, ks=ks, div=True, score=False)
+            recalls, ndcgs, maps, freqs = self.evaluate_metrics(result, pos, self.bundle_item, ks=ks, div=True, score=False)
             recall_list.append(recalls)
+            ndcg_list.append(ndcgs)
             map_list.append(maps)
             freq_list.append(freqs)
             
             recalls = list(np.array(recall_list).sum(axis=0) / len(user_idx))
+            ndcgs = list(np.array(ndcg_list).sum(axis=0) / len(user_idx))
             maps = list(np.array(map_list).sum(axis=0) / len(user_idx))
             freqs = torch.stack(freq_list).sum(dim=0)
-            covs, ents, ginis = evaluate_diversities(freqs, div=div)
+            covs, ents, ginis = self.evaluate_diversities(freqs, div=div)
             
             content = '\n'
             content += f'{batch_idx:7d}|'
             for item in recalls:
+                content += f' {item:.4f} '
+            content += '|'
+            for item in ndcgs:
                 content += f' {item:.4f} '
             content += '|'
             for item in maps:
@@ -156,11 +235,12 @@ class PopCon(object):
         
         
         recalls = list(np.array(recall_list).sum(axis=0) / len(user_idx))
+        ndcgs = list(np.array(ndcg_list).sum(axis=0) / len(user_idx))
         maps = list(np.array(map_list).sum(axis=0) / len(user_idx))
         freqs = torch.stack(freq_list).sum(dim=0)
         covs, ents, ginis = evaluate_diversities(freqs, div=div)
         
-        return recalls, maps, covs, ents, ginis
+        return recalls, ndcgs, maps, covs, ents, ginis
 
 class Origin(object):
     """
