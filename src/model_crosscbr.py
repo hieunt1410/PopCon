@@ -309,7 +309,7 @@ class CrossCBR(nn.Module):
                 ub = torch.cat((u_batch, b_batch), 1)
                 # ub = self.evaluate((u_batch, b_batch), u_idx)
                 ub = torch.reshape(ub, (-1, self.num_bundles))
-                ub_filtered = ub.masked_fill(torch.FloatTensor(ub_masks[start_idx:end_idx]).bool().to(self.device), -float('inf'))
+                ub_filtered = ub.masked_fill(torch.FloatTensor(ub_masks[start_idx:end_idx].toarray()).bool().to(self.device), -float('inf'))
                 ubs_filtered.append(ub_filtered.cpu())
                 ubs_origin.append(ub.cpu())
                 
