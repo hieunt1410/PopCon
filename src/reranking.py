@@ -135,7 +135,7 @@ def main(data, base, model, beta, n, seed):
     user_bundle_test_mask, model_ = load_mat_dataset(data)
     ks = [30, 50]
     result_path = f'./checkpoints/{data}/{base}/model/results.pt'
-    results = model_.load_state_dict(torch.load(result_path).to('cpu'))
+    results = model_.load_state_dict(torch.load(result_path)).to('cpu')
     
     print('=========================== LOADED ===========================')
 
