@@ -288,7 +288,7 @@ class CrossCBR(nn.Module):
     
     def evaluate_test(self, ks, div=True):
         ubs_origin, ubs_filtered = [], []
-        batch_size = self.conf["batch_size_test"]
+        batch_size = 1
         self.eval()
         with torch.no_grad():
             # recall_list, map_list, freq_list = [], [], []
@@ -307,9 +307,9 @@ class CrossCBR(nn.Module):
                 u_batch = self.users_feature[u_idx]
                 b_batch = self.bundles_feature[b_idx]
                 ub = torch.cat((u_batch, b_batch), 1)
-                ub = self.evaluate((u_batch, b_batch), u_idx)
+                # ub = self.evaluate((u_batch, b_batch), u_idx)
                 ub = torch.reshape(ub, (-1, self.num_bundles))
-                ub_filtered = ub.masked_fill(naive_sparse2tensor(ub_masks[start_idx:end_idx]).bool().to(self.device), -float('inf'))
+                ub_filtered = ub.masked_fill(torch.FloatTensor(ub_masks[start_idx:end_idx]).bool().to(self.device), -float('inf'))
                 ubs_filtered.append(ub_filtered.cpu())
                 ubs_origin.append(ub.cpu())
                 
