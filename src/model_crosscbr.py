@@ -285,3 +285,40 @@ class CrossCBR(nn.Module):
 
         scores = torch.mm(users_feature_atom, bundles_feature_atom.t()) + torch.mm(users_feature_non_atom, bundles_feature_non_atom.t())
         return scores
+    
+    def evaluate_test(self, ks, div=True):
+        ubs_origin, ubs_filtered = [], []
+        batch_size = self.conf["batch_size_test"]
+        self.eval()
+        with torch.no_grad():
+            # recall_list, map_list, freq_list = [], [], []
+            user_idx, _ = np.nonzero(np.sum(self.user_bundle_test, 1))
+            test_pos_idx = np.nonzero(self.user_bundle_test[user_idx].toarray())[1]
+            ub_masks = self.user_bundle_test_mask[user_idx]
+            for batch_idx, start_idx in enumerate(range(0, len(user_idx), batch_size)):
+                end_idx = min(start_idx + batch_size, len(user_idx))
+                u_idx = user_idx[start_idx:end_idx]
+                u_idx = np.tile(u_idx, (self.n_bundle, 1)).transpose()
+                b_idx = np.tile(np.arange(self.n_bundle), (u_idx.shape[0], 1))
+                u_idx = u_idx.flatten()
+                b_idx = b_idx.flatten()
+                u_idx = torch.LongTensor(u_idx).to(self.device)
+                b_idx = torch.LongTensor(b_idx).to(self.device)
+                u_batch = self.get_user_embs(u_idx)
+                b_batch = self.get_bundle_embs(u_idx, b_idx, self.device)
+                ub = torch.cat((u_batch, b_batch), 1)
+                ub = self.forward(ub, bundle=True)
+                ub = torch.reshape(ub, (-1, self.n_bundle))
+                ub_filtered = ub.masked_fill(naive_sparse2tensor(ub_masks[start_idx:end_idx]).bool().to(self.device), -float('inf'))
+                # pos_idx = torch.LongTensor(test_pos_idx[start_idx:end_idx]).to(self.device)
+                # recalls, maps, freqs = evaluate_metrics(ub_filtered, pos_idx.unsqueeze(1), self.bundle_item, ks=ks, div=div)
+                ubs_filtered.append(ub_filtered.cpu())
+                ubs_origin.append(ub.cpu())
+                # recall_list.append(recalls)
+                # map_list.append(maps)
+                # freq_list.append(freqs)
+            # recalls = list(np.array(recall_list).sum(axis=0)/len(user_idx))
+            # maps = list(np.array(map_list).sum(axis=0)/len(user_idx))
+            # freqs = torch.stack(freq_list).sum(dim=0)
+        # return recalls, maps, torch.cat(ubs_origin, dim=0), torch.cat(ubs_filtered, dim=0)
+        return torch.cat(ubs_origin, dim=0), torch.cat(ubs_filtered, dim=0)

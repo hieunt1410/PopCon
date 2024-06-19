@@ -105,7 +105,7 @@ def main():
         setting = "_".join(settings)
         log_path = log_path + "/" + setting
         run_path = run_path + "/" + setting
-        checkpoint_model_path = checkpoint_model_path + "/" + 'results.pt'
+        checkpoint_model_path_ = checkpoint_model_path + "/" + 'model.pt'
         checkpoint_conf_path = checkpoint_conf_path + "/" + 'log.txt'
             
         run = SummaryWriter(run_path)
@@ -156,8 +156,10 @@ def main():
                     metrics = {}
                     metrics["val"] = test(model, dataset.val_loader, conf)
                     metrics["test"] = test(model, dataset.test_loader, conf)
-                    best_metrics, best_perform, best_epoch = log_metrics(conf, model, metrics, run, log_path, checkpoint_model_path, checkpoint_conf_path, epoch, batch_anchor, best_metrics, best_perform, best_epoch)
+                    best_metrics, best_perform, best_epoch = log_metrics(conf, model, metrics, run, log_path, checkpoint_model_path_, checkpoint_conf_path, epoch, batch_anchor, best_metrics, best_perform, best_epoch)
 
+        ubs_filtered = model.evaluate_test(conf['topk'], div=True)
+        torch.save(ubs_filtered, checkpoint_model_path + "/results.pt")
 
 def init_best_metrics(conf):
     best_metrics = {}

@@ -162,7 +162,6 @@ class PopCon(object):
         
         return recalls, maps, covs, ents, ginis
 
-
 class Origin(object):
     """
     Class of returning original results
