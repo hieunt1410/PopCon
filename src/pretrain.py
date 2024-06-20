@@ -158,8 +158,8 @@ def main():
                     metrics["test"] = test(model, dataset.test_loader, conf)
                     best_metrics, best_perform, best_epoch = log_metrics(conf, model, metrics, run, log_path, checkpoint_model_path_, checkpoint_conf_path, epoch, batch_anchor, best_metrics, best_perform, best_epoch)
 
-        _, ubs_filtered = model.evaluate_test(conf['topk'], div=True)
-        torch.save(ubs_filtered, checkpoint_model_path + "/results.pt")
+        # _, ubs_filtered = model.evaluate_test(conf['topk'], div=True)
+        # torch.save(ubs_filtered, checkpoint_model_path + "/results.pt")
 
 def init_best_metrics(conf):
     best_metrics = {}
@@ -211,6 +211,8 @@ def log_metrics(conf, model, metrics, run, log_path, checkpoint_model_path, chec
     print("top%d as the final evaluation standard" %(topk_))
     if metrics["val"]["recall"][topk_] > best_metrics["val"]["recall"][topk_] and metrics["val"]["ndcg"][topk_] > best_metrics["val"]["ndcg"][topk_]:
         torch.save(model.state_dict(), checkpoint_model_path)
+        _, ubs_filtered = model.evaluate_test(conf['topk'], div=True)
+        torch.save(ubs_filtered, checkpoint_model_path[:-9] + "/results.pt")
         dump_conf = dict(conf)
         del dump_conf["device"]
         json.dump(dump_conf, open(checkpoint_conf_path, "w"))
