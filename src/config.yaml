@@ -29,7 +29,7 @@ ML1M:
   data_path: '../data'
   batch_size_train: 128 # the batch size for training
   batch_size_test: 128 # the batch size for testing
-  topk: [1, 3, 5] # the topks metrics for evaluation
+  topk: [10] # the topks metrics for evaluation
   neg_num: 1 # number of negatives used for BPR loss. All the experiments use 1.
   
   # search hyperparameters
@@ -49,7 +49,7 @@ ML1M:
   c_lambdas: [0.04] # the contrastive loss weight: lambda_1
   c_temps: [0.25] # the temperature in the contrastive loss: tau
 
-  epochs: 30 # number of epochs to train
+  epochs: 10 # number of epochs to train
   test_interval: 5 # by how many epochs to run the validation and testing.
 
 NetEase:

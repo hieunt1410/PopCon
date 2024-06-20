@@ -78,6 +78,7 @@ class PopCon(object):
         rec_list = []
         user_batch_size = 50
         adjust = torch.zeros_like(cand_scores_sigmoid)
+        print(max(ks))
         for i in range(1, max(ks)+1):
             user_idx = list(range(cand_scores_sigmoid.shape[0]))
             np.random.shuffle(user_idx)
@@ -189,7 +190,7 @@ class PopCon(object):
         batch_size = 2048
         
         ks_str = ','.join(f'{k:2d}' for k in ks)
-        header = f' Epoch |     Recall@{ks_str}    |     NDCG@{ks_str}    ' \
+        header = f' Epoch |     Recall@{ks_str}    |     NDCG@{ks_str}    |' \
                 f'      MAP@{ks_str}     |     Coverage@{ks_str}       |'\
                 f'       Entropy@{ks_str}    |       Ginis@{ks_str}     |'  
         print(header)
@@ -238,7 +239,7 @@ class PopCon(object):
         ndcgs = list(np.array(ndcg_list).sum(axis=0) / len(user_idx))
         maps = list(np.array(map_list).sum(axis=0) / len(user_idx))
         freqs = torch.stack(freq_list).sum(dim=0)
-        covs, ents, ginis = evaluate_diversities(freqs, div=div)
+        covs, ents, ginis = self.evaluate_diversities(freqs, div=div)
         
         return recalls, ndcgs, maps, covs, ents, ginis
 
