@@ -29,7 +29,7 @@ ML1M:
   data_path: '../data'
   batch_size_train: 128 # the batch size for training
   batch_size_test: 128 # the batch size for testing
-  topk: [10] # the topks metrics for evaluation
+  topk: [30, 50] # the topks metrics for evaluation
   neg_num: 1 # number of negatives used for BPR loss. All the experiments use 1.
   
   # search hyperparameters
