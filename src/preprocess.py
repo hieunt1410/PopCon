@@ -33,10 +33,14 @@ def resplit(dataname):
     open(f'../data_pkl/{dataname}/user_bundle_test.txt', 'w') as f3:
         for u in total['user'].unique():
             bundles = total[total['user'] == u]['bundle'].values
-            for bundle in bundles[:-2]:
-                f1.write(f'{u}\t{bundle}\n')
-            f2.write(f'{u}\t{bundles[-2]}\n')
-            f3.write(f'{u}\t{bundles[-1]}\n')       
+            if len(bundles) >= 3:
+                for bundle in bundles[:-2]:
+                    f1.write(f'{u}\t{bundle}\n')
+                f2.write(f'{u}\t{bundles[-2]}\n')
+                f3.write(f'{u}\t{bundles[-1]}\n')
+            else:
+                for bundle in bundles:
+                    f1.write(f'{u}\t{bundle}\n')
     
     shutil.copy(f'../data/{dataname}/user_item.txt', f'../data_pkl/{dataname}/user_item.txt')
     shutil.copy(f'../data/{dataname}/bundle_item.txt', f'../data_pkl/{dataname}/bundle_item.txt')
