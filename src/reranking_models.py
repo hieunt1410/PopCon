@@ -76,7 +76,7 @@ class PopCon(object):
         cand_scores_sigmoid = torch.sigmoid(cand_scores)
         cur_item_freq = torch.zeros(self.n_item) + 1e-9
         rec_list = []
-        user_batch_size = 10
+        user_batch_size = 50
         adjust = torch.zeros_like(cand_scores_sigmoid)
         for i in range(1, max(ks)+1):
             user_idx = list(range(cand_scores_sigmoid.shape[0]))
