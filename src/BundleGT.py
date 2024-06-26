@@ -49,7 +49,7 @@ class BundleGT(nn.Module):
         # <<< Attention part
 
         assert isinstance(raw_graph, list)
-        self.ub_graph, self.ui_graph, self.bi_graph = raw_graph
+        self.ub_graph, _, _, self.ui_graph, self.bi_graph = raw_graph
 
         self.user_bundle_cf_count = self.ui_graph.sum(axis=1)
 
