@@ -163,8 +163,8 @@ class CrossCBR(nn.Module):
         self.bundle_agg_graph_ori = to_tensor(bi_graph).to(device)
 
 
-    def one_propagate(self, graph, A_feature, B_feature, mess_dropout, test):
-        features = torch.cat((A_feature, B_feature), 0)
+    def one_propagate(self, graph, a_feat, b_feat, mess_dropout, test):
+        features = torch.cat((a_feat, b_feat), 0)
         all_features = [features]
 
         for i in range(self.num_layers):
@@ -178,42 +178,42 @@ class CrossCBR(nn.Module):
         all_features = torch.stack(all_features, 1)
         all_features = torch.sum(all_features, dim=1).squeeze(1)
 
-        A_feature, B_feature = torch.split(all_features, (A_feature.shape[0], B_feature.shape[0]), 0)
+        a_feat, b_feat = torch.split(all_features, (a_feat.shape[0], b_feat.shape[0]), 0)
 
-        return A_feature, B_feature
+        return a_feat, b_feat
 
 
-    def get_IL_bundle_rep(self, IL_items_feature, test):
+    def get_IL_bundle_rep(self, _IL_items_feature, test):
         if test:
-            IL_bundles_feature = torch.matmul(self.bundle_agg_graph_ori, IL_items_feature)
+            _IL_bundles_feature = torch.matmul(self.bundle_agg_graph_ori, _IL_items_feature)
         else:
-            IL_bundles_feature = torch.matmul(self.bundle_agg_graph, IL_items_feature)
+            _IL_bundles_feature = torch.matmul(self.bundle_agg_graph, _IL_items_feature)
 
         # simple embedding dropout on bundle embeddings
         if self.conf["bundle_agg_ratio"] != 0 and self.conf["aug_type"] == "MD" and not test:
-            IL_bundles_feature = self.bundle_agg_dropout(IL_bundles_feature)
+            _IL_bundles_feature = self.bundle_agg_dropout(_IL_bundles_feature)
 
-        return IL_bundles_feature
+        return _IL_bundles_feature
 
 
     def propagate(self, test=False):
         #  =============================  item level propagation  =============================
         if test:
-            IL_users_feature, IL_items_feature = self.one_propagate(self.item_level_graph_ori, self.users_feature, self.items_feature, self.item_level_dropout, test)
+            _IL_users_feature, _IL_items_feature = self.one_propagate(self.item_level_graph_ori, self.users_feature, self.items_feature, self.item_level_dropout, test)
         else:
-            IL_users_feature, IL_items_feature = self.one_propagate(self.item_level_graph, self.users_feature, self.items_feature, self.item_level_dropout, test)
+            _IL_users_feature, _IL_items_feature = self.one_propagate(self.item_level_graph, self.users_feature, self.items_feature, self.item_level_dropout, test)
 
         # aggregate the items embeddings within one bundle to obtain the bundle representation
-        IL_bundles_feature = self.get_IL_bundle_rep(IL_items_feature, test)
+        _IL_bundles_feature = self.get_IL_bundle_rep(_IL_items_feature, test)
 
         #  ============================= bundle level propagation =============================
         if test:
-            BL_users_feature, BL_bundles_feature = self.one_propagate(self.bundle_level_graph_ori, self.users_feature, self.bundles_feature, self.bundle_level_dropout, test)
+            _BL_users_feature, _BL_bundles_feature = self.one_propagate(self.bundle_level_graph_ori, self.users_feature, self.bundles_feature, self.bundle_level_dropout, test)
         else:
-            BL_users_feature, BL_bundles_feature = self.one_propagate(self.bundle_level_graph, self.users_feature, self.bundles_feature, self.bundle_level_dropout, test)
+            _BL_users_feature, _BL_bundles_feature = self.one_propagate(self.bundle_level_graph, self.users_feature, self.bundles_feature, self.bundle_level_dropout, test)
 
-        users_feature = [IL_users_feature, BL_users_feature]
-        bundles_feature = [IL_bundles_feature, BL_bundles_feature]
+        users_feature = [_IL_users_feature, _BL_users_feature]
+        bundles_feature = [_IL_bundles_feature, _BL_bundles_feature]
 
         return users_feature, bundles_feature
 
@@ -240,16 +240,16 @@ class CrossCBR(nn.Module):
     def cal_loss(self, users_feature, bundles_feature):
         # IL: item_level, BL: bundle_level
         # [bs, 1, emb_size]
-        IL_users_feature, BL_users_feature = users_feature
+        _IL_users_feature, _BL_users_feature = users_feature
         # [bs, 1+neg_num, emb_size]
-        IL_bundles_feature, BL_bundles_feature = bundles_feature
+        _IL_bundles_feature, _BL_bundles_feature = bundles_feature
         # [bs, 1+neg_num]
-        pred = torch.sum(IL_users_feature * IL_bundles_feature, 2) + torch.sum(BL_users_feature * BL_bundles_feature, 2)
+        pred = torch.sum(_IL_users_feature * _IL_bundles_feature, 2) + torch.sum(_BL_users_feature * _BL_bundles_feature, 2)
         bpr_loss = cal_bpr_loss(pred)
 
         # cl is abbr. of "contrastive loss"
-        u_cross_view_cl = self.cal_c_loss(IL_users_feature, BL_users_feature)
-        b_cross_view_cl = self.cal_c_loss(IL_bundles_feature, BL_bundles_feature)
+        u_cross_view_cl = self.cal_c_loss(_IL_users_feature, _BL_users_feature)
+        b_cross_view_cl = self.cal_c_loss(_IL_bundles_feature, _BL_bundles_feature)
 
         c_losses = [u_cross_view_cl, b_cross_view_cl]
 
@@ -292,9 +292,9 @@ class CrossCBR(nn.Module):
         self.eval()        
 
         with torch.no_grad():
-            # recall_list, map_list, freq_list = [], [], []
+
             user_idx, _ = np.nonzero(np.sum(self.ub_graph_test, 1))
-            test_pos_idx = np.nonzero(self.ub_graph_test[user_idx].toarray())[1]
+            # test_pos_idx = np.nonzero(self.ub_graph_test[user_idx].toarray())[1]
             ub_masks = self.ub_graph_test[user_idx]
             for batch_idx, start_idx in enumerate(range(0, len(user_idx), batch_size)):
                 end_idx = min(start_idx + batch_size, len(user_idx))

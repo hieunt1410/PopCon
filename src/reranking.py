@@ -2,9 +2,8 @@ import time
 
 import click
 
-from reranking_models import *
-from util_crosscbr import *
-from model_crosscbr import *
+from reranking_models import PopCon, Origin
+from util_crosscbr import Datasets
 
 import yaml
 from itertools import product
@@ -31,7 +30,7 @@ def load_mat_dataset(dataname):
     """
     Load dataset
     """
-    path = f'../data_pkl/{dataname}'
+    # path = f'../data_pkl/{dataname}'
     conf = yaml.safe_load(open("./config.yaml"))
     conf = conf[dataname]
     conf['dataset'] = dataname

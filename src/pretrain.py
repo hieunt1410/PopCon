@@ -14,6 +14,7 @@ import torch
 import torch.optim as optim
 from util_crosscbr import Datasets
 from model_crosscbr import CrossCBR
+from BundleGT import BundleGT
 from preprocess import resplit
 
 def get_cmd():
@@ -113,6 +114,8 @@ def main():
         # model
         if conf['model'] == 'CrossCBR':
             model = CrossCBR(conf, dataset.graphs).to(device)
+        elif conf['model'] == 'BundleGT':
+            model = BundleGT(conf, dataset.graphs).to(device)
         else:
             raise ValueError("Unimplemented model %s" %(conf["model"]))
 
@@ -135,10 +138,10 @@ def main():
                 batch = [x.to(device) for x in batch]
                 batch_anchor = epoch_anchor + batch_i
 
-                ED_drop = False
+                ed_drop = False
                 if conf["aug_type"] == "ED" and (batch_anchor+1) % ed_interval_bs == 0:
-                    ED_drop = True
-                bpr_loss, c_loss = model(batch, ED_drop=ED_drop)
+                    ed_drop = True
+                bpr_loss, c_loss = model(batch, ed_drop=ed_drop)
                 loss = bpr_loss + conf["c_lambda"] * c_loss
                 loss.backward()
                 optimizer.step()
@@ -158,8 +161,8 @@ def main():
                     metrics["test"] = test(model, dataset.test_loader, conf)
                     best_metrics, best_perform, best_epoch = log_metrics(conf, model, metrics, run, log_path, checkpoint_model_path_, checkpoint_conf_path, epoch, batch_anchor, best_metrics, best_perform, best_epoch)
 
-        # _, ubs_filtered = model.evaluate_test(conf['topk'], div=True)
-        # torch.save(ubs_filtered, checkpoint_model_path + "/results.pt")
+        _, ubs_filtered = model.evaluate_test(conf['topk'], div=True)
+        torch.save(ubs_filtered, checkpoint_model_path + "/results.pt")
 
 def init_best_metrics(conf):
     best_metrics = {}
@@ -211,8 +214,8 @@ def log_metrics(conf, model, metrics, run, log_path, checkpoint_model_path, chec
     print("top%d as the final evaluation standard" %(topk_))
     if metrics["val"]["recall"][topk_] > best_metrics["val"]["recall"][topk_] and metrics["val"]["ndcg"][topk_] > best_metrics["val"]["ndcg"][topk_]:
         torch.save(model.state_dict(), checkpoint_model_path)
-        _, ubs_filtered = model.evaluate_test(conf['topk'], div=True)
-        torch.save(ubs_filtered, checkpoint_model_path[:-9] + "/results.pt")
+        # _, ubs_filtered = model.evaluate_test(conf['topk'], div=True)
+        # torch.save(ubs_filtered, checkpoint_model_path[:-9] + "/results.pt")
         dump_conf = dict(conf)
         del dump_conf["device"]
         json.dump(dump_conf, open(checkpoint_conf_path, "w"))
@@ -290,25 +293,25 @@ def get_recall(pred, grd, is_hit, topk):
 
 
 def get_ndcg(pred, grd, is_hit, topk):
-    def DCG(hit, topk, device):
+    def _DCG(hit, topk, device):
         hit = hit/torch.log2(torch.arange(2, topk+2, device=device, dtype=torch.float))
         return hit.sum(-1)
 
-    def IDCG(num_pos, topk, device):
+    def _IDCG(num_pos, topk, device):
         hit = torch.zeros(topk, dtype=torch.float)
         hit[:num_pos] = 1
-        return DCG(hit, topk, device)
+        return _DCG(hit, topk, device)
 
     device = grd.device
-    IDCGs = torch.empty(1+topk, dtype=torch.float)
-    IDCGs[0] = 1  # avoid 0/0
+    _IDCGs = torch.empty(1+topk, dtype=torch.float)
+    _IDCGs[0] = 1  # avoid 0/0
     for i in range(1, topk+1):
-        IDCGs[i] = IDCG(i, topk, device)
+        _IDCGs[i] = _IDCG(i, topk, device)
 
     num_pos = grd.sum(dim=1).clamp(0, topk).to(torch.long)
-    dcg = DCG(is_hit, topk, device)
+    dcg = _DCG(is_hit, topk, device)
 
-    idcg = IDCGs[num_pos]
+    idcg = _IDCGs[num_pos]
     ndcg = dcg/idcg.to(device)
 
     denorm = pred.shape[0] - (num_pos == 0).sum().item()

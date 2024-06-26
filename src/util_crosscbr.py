@@ -10,15 +10,15 @@ import torch
 from torch.utils.data import Dataset, DataLoader
 import pickle
 
-def print_statistics(X, string):
+def print_statistics(x, string):
     print('>'*10 + string + '>'*10 )
-    print('Average interactions', X.sum(1).mean(0).item())
-    nonzero_row_indice, nonzero_col_indice = X.nonzero()
+    print('Average interactions', x.sum(1).mean(0).item())
+    nonzero_row_indice, nonzero_col_indice = x.nonzero()
     unique_nonzero_row_indice = np.unique(nonzero_row_indice)
     unique_nonzero_col_indice = np.unique(nonzero_col_indice)
-    print('Non-zero rows', len(unique_nonzero_row_indice)/X.shape[0])
-    print('Non-zero columns', len(unique_nonzero_col_indice)/X.shape[1])
-    print('Matrix density', len(nonzero_row_indice)/(X.shape[0]*X.shape[1]))
+    print('Non-zero rows', len(unique_nonzero_row_indice)/x.shape[0])
+    print('Non-zero columns', len(unique_nonzero_col_indice)/x.shape[1])
+    print('Matrix density', len(nonzero_row_indice)/(x.shape[0]*x.shape[1]))
 
 
 class BundleTrainDataset(Dataset):

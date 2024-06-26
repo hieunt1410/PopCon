@@ -114,10 +114,10 @@ class PopCon(object):
         else:
             pred_rank = pred
         for k in ks:
-            recall, ndcg, map, freq = self.get_metrics(pred_rank, pos_idx, k, bundle_item, div)
+            recall, ndcg, mAP, freq = self.get_metrics(pred_rank, pos_idx, k, bundle_item, div)
             recalls.append(recall)
             ndcgs.append(ndcg)
-            maps.append(map)
+            maps.append(mAP)
             freqs.append(freq)
         return recalls, ndcgs, maps, torch.stack(freqs)
 
@@ -127,7 +127,7 @@ class PopCon(object):
         Get evaluation metrics
         """
         pos = torch.eq(pred_rank, pos_idx).float()
-        # recall and map
+        # recall and mAP
         recall = pos[:, :k].sum().item()
         
         dcg = (pos[:, :k] / torch.log2(torch.arange(2, k + 2).float())).sum().item()
@@ -135,14 +135,14 @@ class PopCon(object):
         ndcg = dcg / idcg if idcg > 0 else 0
         
         idxs = torch.nonzero(pos[:, :k], as_tuple=True)[1]
-        map = (1 / (idxs + 1).float()).sum().item()
+        mAP = (1 / (idxs + 1).float()).sum().item()
         # frequency
         if div:
             freq = torch.tensor(
                 bundle_item[pred_rank[:, :k].flatten().cpu()].sum(axis=0)).squeeze()
         else:
             freq = torch.zeros(bundle_item.shape[1])
-        return recall, ndcg, map, freq
+        return recall, ndcg, mAP, freq
         
     def evaluate_diversities(self, freqs, div: bool):
         """
@@ -284,9 +284,9 @@ class Origin(object):
         
         for k in ks:
             pred_rank = pred_ranks[:, :k]
-            recall, map, freq = get_metrics(pred_rank, torch.LongTensor(test_pos_idx).unsqueeze(1), k, self.bundle_item, div=div)
+            recall, mAP, freq = get_metrics(pred_rank, torch.LongTensor(test_pos_idx).unsqueeze(1), k, self.bundle_item, div=div)
             recalls.append(recall)
-            maps.append(map)
+            maps.append(mAP)
             freqs.append(freq)
             
             recalls = list(np.array(recall_list).sum(axis=0) / len(user_idx))

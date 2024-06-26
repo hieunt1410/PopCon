@@ -100,11 +100,11 @@ class CrossCBR(nn.Module):
         modification_ratio = self.conf["item_level_ratio"]
 
         item_level_graph = sp.bmat([[sp.csr_matrix((ui_graph.shape[0], ui_graph.shape[0])), ui_graph], [ui_graph.T, sp.csr_matrix((ui_graph.shape[1], ui_graph.shape[1]))]])
-        if modification_ratio != 0:
-            if self.conf["aug_type"] == "ED":
-                graph = item_level_graph.tocoo()
-                values = np_edge_dropout(graph.data, modification_ratio)
-                item_level_graph = sp.coo_matrix((values, (graph.row, graph.col)), shape=graph.shape).tocsr()
+        if modification_ratio != 0 and self.conf["aug_type"] == "ED":
+            # if self.conf["aug_type"] == "ED":
+            graph = item_level_graph.tocoo()
+            values = np_edge_dropout(graph.data, modification_ratio)
+            item_level_graph = sp.coo_matrix((values, (graph.row, graph.col)), shape=graph.shape).tocsr()
 
         self.item_level_graph = to_tensor(laplace_transform(item_level_graph)).to(device)
 
@@ -265,8 +265,6 @@ class CrossCBR(nn.Module):
             self.get_bundle_level_graph()
             self.get_bundle_agg_graph()
 
-        # users: [bs, 1]
-        # bundles: [bs, 1+neg_num]
         users, bundles = batch
         users_feature, bundles_feature = self.propagate()
 
