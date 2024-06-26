@@ -194,9 +194,6 @@ def main():
                 metrics["val"] = test(model, dataset.val_loader, conf)
                 metrics["test"] = test(model, dataset.test_loader, conf)
                 best_metrics, best_perform, best_epoch = log_metrics(conf, model, metrics, log_path, checkpoint_model_path_, checkpoint_conf_path, epoch, batch_anchor, best_metrics, best_perform, best_epoch)
-        
-        _, ubs_filtered = model.evaluate_test(conf['topk'], div=True)
-        torch.save(ubs_filtered, checkpoint_model_path + "/results.pt")
          
         if conf['early_stopping'] > 0 and (epoch - best_epoch) >= conf['early_stopping']:
             with open(log_path, "a") as f:
@@ -212,6 +209,9 @@ def main():
             avg_loss = []
             f.write(loss_str)
             print(loss_str)
+            
+    _, ubs_filtered = model.evaluate_test(conf['topk'], div=True)
+    torch.save(ubs_filtered, checkpoint_model_path + "/results.pt")
 
 def init_best_metrics(conf):
     best_metrics = {}
