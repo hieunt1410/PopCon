@@ -139,7 +139,7 @@ def main():
     setting = "_".join(settings)
     log_path = log_path + "/" + setting
     base_checkpoint_model_path = checkpoint_model_path
-    checkpoint_model_path = checkpoint_model_path + "/" + setting
+    checkpoint_model_path_ = checkpoint_model_path + "/" + setting
     checkpoint_conf_path = checkpoint_conf_path + "/" + setting
         
     if conf['model'] == 'BundleGT':
@@ -193,7 +193,7 @@ def main():
                 metrics = {}
                 metrics["val"] = test(model, dataset.val_loader, conf)
                 metrics["test"] = test(model, dataset.test_loader, conf)
-                best_metrics, best_perform, best_epoch = log_metrics(conf, model, metrics, log_path, checkpoint_model_path, checkpoint_conf_path, epoch, batch_anchor, best_metrics, best_perform, best_epoch)
+                best_metrics, best_perform, best_epoch = log_metrics(conf, model, metrics, log_path, checkpoint_model_path_, checkpoint_conf_path, epoch, batch_anchor, best_metrics, best_perform, best_epoch)
         
         _, ubs_filtered = model.evaluate_test(conf['topk'], div=True)
         torch.save(ubs_filtered, checkpoint_model_path + "/results.pt")
