@@ -5,7 +5,7 @@ import math
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from .HGT import HGT
+from HGT import HGT
 
 eps = 1e-9
 

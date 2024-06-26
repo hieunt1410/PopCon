@@ -2,8 +2,8 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from copy import copy
-from .LiT import LiT
-from .LGCN import LGCN
+from LiT import LiT
+from LGCN import LGCN
 
 
 eps = 1e-9
