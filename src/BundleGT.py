@@ -6,6 +6,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from HGT import HGT
+import numpy as np
 
 eps = 1e-9
 
