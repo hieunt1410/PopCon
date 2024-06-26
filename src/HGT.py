@@ -57,7 +57,7 @@ class HGT(nn.Module):
             }
         )
 
-        avg_ub_seq = {"Youshu": 70, "NetEase": 30, "iFashion": 5}
+        avg_ub_seq = {"Youshu": 70, "NetEase": 30, "iFashion": 5, 'ML1M': 40}
         LiT_ub_conf = copy(self.conf)
         LiT_ub_conf["n_layer"] = self.conf["n_trans_layer"]
         LiT_ub_conf["num_sequence"] = LiT_ub_conf["n_user"]
