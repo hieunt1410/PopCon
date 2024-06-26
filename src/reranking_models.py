@@ -1,6 +1,6 @@
 from tqdm import tqdm
 
-from util_crosscbr import *
+from utility import *
 
 
 class PopCon(object):

@@ -3,7 +3,7 @@ import time
 import click
 
 from reranking_models import PopCon, Origin
-from util_crosscbr import Datasets
+from utility import Datasets
 
 import yaml
 from itertools import product
