@@ -36,7 +36,7 @@ def main():
     paras = get_cmd().__dict__
     dataset_name = paras["dataset"]
 
-    assert paras["model"] in ["CrossCBR"], "Pls select models from: CrossCBR"
+    assert paras["model"] in ["CrossCBR", "BundleGT"], "Pls select models from: CrossCBR, BundleGT"
 
     if "_" in dataset_name:
         conf = conf[dataset_name.split("_")[0]]
