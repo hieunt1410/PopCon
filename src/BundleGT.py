@@ -132,7 +132,7 @@ class BundleGT(nn.Module):
             for batch_idx, start_idx in enumerate(range(0, len(user_idx), batch_size)):
                 end_idx = min(start_idx + batch_size, len(user_idx))
                 u_idx = user_idx[start_idx:end_idx] #[uid]
-                propagate_res = self.propagate(test=True)
+                propagate_res = self.propagate()
                 ub = self.evaluate(propagate_res, u_idx)
                 ub_filtered = ub.masked_fill(torch.FloatTensor(ub_masks[start_idx:end_idx].toarray()).bool().to(self.device), -float('inf'))
                 ubs_filtered.append(ub_filtered.cpu())
